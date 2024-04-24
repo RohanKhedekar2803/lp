@@ -1,0 +1,129 @@
+/******************************************************************************
+
+Welcome to GDB Online.
+GDB online is an online compiler and debugger tool for C, C++, Python, Java, PHP, Ruby, Perl,
+C#, OCaml, VB, Swift, Pascal, Fortran, Haskell, Objective-C, Assembly, HTML, CSS, JS, SQLite, Prolog.
+Code, Compile, Run and Debug online from anywhere in world.
+
+*******************************************************************************/
+#include <iostream>
+#include <omp.h>
+#include <vector>
+#include <queue>
+#include <stack>
+using namespace std;
+
+class Graph{
+    public:
+        int vertices;
+        int edges;
+        vector<vector<int>>adj;
+
+        Graph(int vertices,int edges){
+            this->vertices=vertices;
+            this->edges=edges;
+            adj.resize(vertices);
+        }
+        Graph(){
+        }
+        void setVertice(){
+           
+            int temp=-1;
+            cout<<" enter number of vertices";
+            cin>>temp;
+            this->vertices=temp;
+            adj.resize(vertices);
+        }
+        void setEdges(){
+            int temp=-1;
+            cout<<" enter number of edges";
+            cin>>temp;
+            this->edges=temp;
+        }
+        void CreateGraph(){
+            for(int i=0;i<edges;i++){
+                int temp1=-1,space=-1,temp2=-1;
+                cout<<"Enter Source and Destination for"<<i<<"th edge";
+                cin>>temp1>>temp2;
+                adj[temp1].push_back(temp2);
+                adj[temp2].push_back(temp1);
+            }
+        }
+        
+        void SeeGraph(){
+            cout<<"Graph is :"<<endl;
+            for (int i = 0; i < vertices; i++) {
+                cout<<i<<" -->";
+                for (auto j : adj[i]) {
+                    cout<<j<<" ";
+                }
+                cout<<endl;
+            }
+        }
+        
+        void BFS(){
+            int start;
+            cout<<"enter start point for BFS"<<endl;
+            cin>>start;
+            queue<int>q;
+            vector<int>visited(vertices,0);
+            cout<<"BFS is : -> ";
+            q.push(start);
+            while(!q.empty()){
+                int node=q.front();
+                q.pop();
+                cout<<node<<" ";
+                visited[node]=1;
+                #pragma omp parallel for num_threads(4)
+                for(auto it : adj[node]){
+                    if(visited[it]==0){
+                        visited[it]++;
+                        q.push(it);
+                    }
+                }
+            }
+            cout<<endl;
+            
+        }
+        void DFS(){
+            int start;
+            cout<<"enter start point for DFS"<<endl;
+            cin>>start;
+            stack<int>st;
+            vector<int>visited(vertices,0);
+            st.push(start);
+            cout<<"DFS is : -> ";
+            dfs(st,visited);
+        }
+        
+        void dfs(stack<int> st, vector<int>visited){
+            while(st.empty()==false){
+                int node = st.top();
+                st.pop();
+                if(visited[node]==0){
+                    cout<<node<<" ";
+                    visited[node]=1;
+                    #pragma omp parallel for
+                        for(auto it : adj[node]) {
+                            if (visited[it]==0) {
+                                st.push(it);
+                            }
+                        }
+    
+                }
+            }
+        }
+        
+};
+int main(){
+    
+    Graph* g = new Graph();
+    g->setVertice();
+    g->setEdges();
+    g->CreateGraph();
+    g->SeeGraph();
+    g->BFS();
+    g->DFS();
+
+    return 0;
+}
