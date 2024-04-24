@@ -1,0 +1,72 @@
+#include <iostream>
+#include <bits/stdc++.h>
+using namespace std;
+
+void merge(vector<int>& vec,int l,int mid,int r){
+    int a=mid-l+1;
+    int b=r-mid;
+    vector<int>v1(a);
+    vector<int>v2(b);
+    for(int i=0;i<a;i++){
+        v1[i]=vec[i+l];
+    }
+    
+    for(int i=0;i<b;i++){
+        v2[i]=vec[i+mid+1];
+    }
+    //add v1 and v2 in vec
+    int i=0,j=0,zero=l;
+    while(i<a and j<b){
+        if(v1[i] < v2[j]){
+            vec[zero++]=v1[i++];
+        }else{
+            vec[zero++]=v2[j++];
+        }
+    }
+    
+    while(i<a){
+            vec[zero++]=v1[i++];
+    }
+    
+    while(j<b){
+            vec[zero++]=v2[j++];
+    }
+    
+}
+void mergesort(vector<int>& vec,int l,int r){
+    
+    if(l<r){
+        int mid = (l+r)/2;
+        #pragma omp parallel sections
+        {
+            #pragma omp section
+            {
+                mergesort(vec,l,mid);
+            }
+            #pragma omp section
+            {
+                mergesort(vec,mid+1,r);
+            }
+        }
+
+        merge(vec,l,mid,r);
+    }
+}
+int main()
+{
+    clock_t t1=clock();
+    vector<int> vec={1,100 , 6,3,3,4,3,3,3,3,3,4,3,3,3,4,3,3,2,3,4,3,3};
+    cout<<"before: ";
+    for(auto it : vec)cout<<it<<" ";
+    cout<<endl;
+    
+    
+    mergesort(vec,0,vec.size()-1);
+    cout<<"after: ";
+    for(auto it : vec)cout<<it<<" ";
+    cout<<endl;
+    clock_t t2=clock();
+    double timing =double(t2-t1)/CLOCKS_PER_SEC;
+    cout<<timing*1000000<<" mili sec";
+    return 0;
+}

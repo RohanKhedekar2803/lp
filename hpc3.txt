@@ -1,0 +1,52 @@
+/******************************************************************************
+
+Welcome to GDB Online.
+GDB online is an online compiler and debugger tool for C, C++, Python, Java, PHP, Ruby, Perl,
+C#, OCaml, VB, Swift, Pascal, Fortran, Haskell, Objective-C, Assembly, HTML, CSS, JS, SQLite, Prolog.
+Code, Compile, Run and Debug online from anywhere in world.
+
+*******************************************************************************/
+#include <iostream>
+#include <bits/stdc++.h>
+using namespace std;
+void min(vector<int>vec){
+    int mini=INT_MAX;
+    #pragma omp parallel for reduction(min : mini)
+    for(auto it : vec){
+        if(it<mini){
+            mini=it;
+        }
+    }
+    cout<<"lowest is "<<mini<<endl;
+}
+
+void max(vector<int>vec){
+    int maxi=INT_MIN;
+    #pragma omp parallel for reduction(max : maxi)
+    for(auto it : vec){
+        if(it > maxi){
+            maxi=it;
+        }
+    }
+    cout<<"Highest is "<<maxi<<endl;
+}
+
+void mean1(vector<float>vec){
+    float mean=0,sum=0;
+    #pragma omp parallel for reduction(+ : sum)
+    for(auto it : vec){
+        sum+=it;
+    }
+    mean=sum/vec.size();
+    cout<<"Mean is "<<mean<<endl;
+}
+int main()
+{
+    int mini=INT_MAX,maxi=INT_MIN,mean=0;
+    vector<int> vec={1,2,38,27,100};
+    min(vec);
+    max(vec);
+    mean1({1.1,2.1,38,27,100});
+
+    return 0;
+}

@@ -1,0 +1,75 @@
+%%cu
+
+#include<iostream>
+using namespace std;
+
+
+__global__ void matrix_mul(int* A, int* B, int* C, int size) {
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (row < size && col < size) {
+        int sum = 0;
+        for (int i = 0; i < size; i++) {
+            sum += A[row * size + i] * B[i * size + col];
+        }
+        C[row * size + col] = sum;
+    }
+}
+
+int main(){
+    int n=2;
+    int N=n*n;
+    int bytesize= N * sizeof(int);
+
+    int * a = new int[N];
+    int * b = new int[N];
+    int * c = new int[N];
+
+    // populate array
+    for(int i=0;i<N;i++){
+        a[i]=rand()%10;
+        b[i]=rand()%10;
+    }
+    // print a
+    cout<<"matrix A is "<<endl;
+    for(int i=0;i<N;i++){
+        cout<<a[i]<<" ";
+        if( (i+1) % n==0)cout<<endl;
+    } 
+
+    cout<<"matrix B is "<<endl;
+    for(int i=0;i<N;i++){
+        cout<<b[i]<<" ";
+       if( (i+1) % n==0)cout<<endl;
+    }       
+
+    int *ga,*gb,*gc;
+
+    cudaMalloc(&ga,bytesize);
+    cudaMalloc(&gb,bytesize);
+    cudaMalloc(&gc,bytesize);
+
+    cudaMemcpy( ga, a,bytesize,cudaMemcpyHostToDevice);
+    cudaMemcpy( gb, b,bytesize,cudaMemcpyHostToDevice);
+
+    dim3 threadsPerBlock(16, 16);
+    dim3 numBlocks((N + 15) / 16, (N + 15) / 16);
+    matrix_mul<<<numBlocks, threadsPerBlock>>>(ga,gb,gc,n);
+
+    cudaMemcpy(c, gc, bytesize, cudaMemcpyDeviceToHost);
+
+    cout<<"matrix C is "<<endl;
+    for(int i=0;i<N;i++){
+        cout<<c[i]<<" ";
+       if( (i+1) % n==0)cout<<endl;
+    } 
+
+    delete[] a;
+    delete[] b;
+    delete[] c;
+    cudaFree(ga);
+    cudaFree(gb);
+    cudaFree(gc);
+    return 0;
+}
